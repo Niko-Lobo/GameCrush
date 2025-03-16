@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 def generate_crash_point(rtp, mode="Normal"):
     """
     Generate a random crash point based on input RTP.
-    For Additional MAX, scale crash points to balance higher cost and meta-multipliers.
+    For Additional MAX, scale down to balance higher cost and meta-multipliers.
     """
     u = random.uniform(0, 1)
     if mode == "Additional MAX":
-        scale_factor = 0.75  # Increased to 0.75 to boost hit rate
+        scale_factor = 0.5  # Increased to 0.5 to reduce early crashes
         if u < 1 - (rtp / 100) * scale_factor:
             return 1.0
         else:
@@ -72,7 +72,7 @@ for round_num in range(1, num_rounds + 1):
         payout = 0
         result = f"Round {round_num} ({mode}): Bet = {bet:.2f}, Crash at {crash_point:.1f}x, Payout = {payout:.2f}"
     else:
-        total_meta = sum(meta_multipliers) / 120 if meta_multipliers else 1  # Adjusted divisor to 120
+        total_meta = sum(meta_multipliers) / 100 if meta_multipliers else 1
         payout = bet * cashout_multiplier * total_meta
         if payout >= base_bet * 50000:
             payout = base_bet * 50000
@@ -138,10 +138,10 @@ for mode in stats:
     print(f"Volatility: {mode_volatility}")
 
     # Generate histogram for payout distribution
-    # plt.figure(figsize=(8, 6))
-    # plt.hist(s["payouts"], bins=50, color='skyblue', edgecolor='black')
-    # plt.title(f"Payout Distribution for {mode} Mode")
-    # plt.xlabel("Payout")
-    # plt.ylabel("Frequency")
-    # plt.grid(True, alpha=0.3)
-    # plt.show()
+    plt.figure(figsize=(8, 6))
+    plt.hist(s["payouts"], bins=50, color='skyblue', edgecolor='black')
+    plt.title(f"Payout Distribution for {mode} Mode")
+    plt.xlabel("Payout")
+    plt.ylabel("Frequency")
+    plt.grid(True, alpha=0.3)
+    plt.show()
