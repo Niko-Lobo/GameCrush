@@ -10,13 +10,14 @@ def generate_crash_point(rtp, mode="Normal"):
     """
     u = random.uniform(0, 1)
     if mode == "Additional MAX":
-        scale_factor = 0.75  # Increased to 0.75 to boost hit rate
+        scale_factor = 1.0  # Increased to 1.0 to boost hit rate
         if u < 1 - (rtp / 100) * scale_factor:
             return 1.0
         else:
             return min((rtp / 100) * scale_factor / (1 - u), 50000)
     else:
-        if u < 1 - (rtp / 100):
+        # Fine-tuned for Normal and Additional
+        if u < 1 - (rtp / 100) * 1.01:
             return 1.0
         else:
             return min((rtp / 100) / (1 - u), 50000)
@@ -72,7 +73,8 @@ for round_num in range(1, num_rounds + 1):
         payout = 0
         result = f"Round {round_num} ({mode}): Bet = {bet:.2f}, Crash at {crash_point:.1f}x, Payout = {payout:.2f}"
     else:
-        total_meta = sum(meta_multipliers) / 120 if meta_multipliers else 1  # Adjusted divisor to 120
+        divisor = 180 if mode == "Additional" else 150 if mode == "Additional MAX" else 1
+        total_meta = sum(meta_multipliers) / divisor if meta_multipliers else 1
         payout = bet * cashout_multiplier * total_meta
         if payout >= base_bet * 50000:
             payout = base_bet * 50000
@@ -111,6 +113,7 @@ print(f"Mean Payout: {overall_mean:.2f}")
 print(f"Standard Deviation: {overall_sd:.2f}")
 print(f"Variance: {overall_variance:.2f}")
 print(f"Hit Rate: {overall_hit_rate:.2f}%")
+print(f"Max Wins: {overall_max_wins}")
 print(f"Max Win Rate: {overall_max_win_rate:.2f}%")
 print(f"Volatility: {overall_volatility}")
 
@@ -134,14 +137,15 @@ for mode in stats:
     print(f"Standard Deviation: {mode_sd:.2f}")
     print(f"Variance: {mode_variance:.2f}")
     print(f"Hit Rate: {mode_hit_rate:.2f}%")
+    print(f"Max Wins: {s['max_wins']}")
     print(f"Max Win Rate: {mode_max_win_rate:.2f}%")
     print(f"Volatility: {mode_volatility}")
 
     # Generate histogram for payout distribution
-    # plt.figure(figsize=(8, 6))
-    # plt.hist(s["payouts"], bins=50, color='skyblue', edgecolor='black')
-    # plt.title(f"Payout Distribution for {mode} Mode")
-    # plt.xlabel("Payout")
-    # plt.ylabel("Frequency")
-    # plt.grid(True, alpha=0.3)
-    # plt.show()
+    plt.figure(figsize=(8, 6))
+    plt.hist(s["payouts"], bins=50, color='skyblue', edgecolor='black')
+    plt.title(f"Payout Distribution for {mode} Mode")
+    plt.xlabel("Payout")
+    plt.ylabel("Frequency")
+    plt.grid(True, alpha=0.3)
+    plt.show()
